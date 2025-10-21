@@ -246,24 +246,35 @@
       sizeCanvas();
 
       edTitle.textContent = localStorage.getItem('savedTitle') || 'Title';
+      edPoster.crossOrigin = 'anonymous';
       edPoster.src = localStorage.getItem('savedPoster') || '';
 
+
       edPoster.onload = () => {
-        const thief = new ColorThief();
-        let cols = [];
-        try { cols = thief.getPalette(edPoster, 3); } catch(e) { cols = [[239,117,192],[106,124,255],[17,17,17]]; }
-        cols.push([255,255,255]);
-        edPalette.innerHTML = '';
-        cols.forEach(rgb=>{
-          const sw = document.createElement('div');
-          const css = `rgb(${rgb[0]},${rgb[1]},${rgb[2]})`;
-          sw.className='editor-swatch';
-          sw.style.background = css;
-          sw.title = css;
-          sw.onclick = ()=> editor.style.setProperty('--tint', css);
-          edPalette.appendChild(sw);
-        });
-      };
+      const thief = new ColorThief();
+      let cols = [];
+      try {
+      cols = thief
+      .getPalette(edPoster, 8)
+      .filter(([r, g, b]) => !(r > 245 && g > 245 && b > 245))
+      .slice(0, 3);
+  } catch (e) {
+    cols = [[239,117,192],[106,124,255],[17,17,17]];
+  }
+
+    const finalPalette = [...cols, [255, 255, 255]];
+
+    edPalette.innerHTML = '';
+    finalPalette.forEach(([r, g, b]) => {
+    const sw = document.createElement('div');
+    const css = `rgb(${r},${g},${b})`;
+    sw.className = 'editor-swatch';
+    sw.style.background = css;
+    sw.title = css;
+    sw.onclick = () => editor.style.setProperty('--tint', css);
+    edPalette.appendChild(sw);
+  });
+};
 
       buildToolbar();
       bindDrawing();
